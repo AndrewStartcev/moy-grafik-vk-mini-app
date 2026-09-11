@@ -3,6 +3,7 @@ import { Button } from '@vkontakte/vkui';
 import {
   BriefcaseBusiness,
   CalendarDays,
+  Check,
   Clock3,
   RefreshCw,
   SlidersHorizontal,
@@ -26,10 +27,10 @@ const PRESETS: Array<{
 }> = [
   { id: '2x2', description: '2 рабочих · 2 выходных' },
   { id: '3x3', description: '3 рабочих · 3 выходных' },
-  { id: '1x3', description: '1 смена (24 ч) · 3 выходных' },
+  { id: '1x3', description: 'Сутки · 3 выходных' },
   { id: 'day-night-48', description: 'День · ночь · 2 выходных' },
   { id: '5x2', description: '5 рабочих · 2 выходных' },
-  { id: 'custom', description: 'Настрой свой повторяющийся цикл' },
+  { id: 'custom', description: 'Свой повторяющийся цикл' },
 ];
 
 const CUSTOM_OPTIONS: Array<{ type: CycleShiftType; label: string }> = [
@@ -47,7 +48,7 @@ const SHORT: Record<CycleShiftType, string> = {
 };
 
 function PresetIcon({ preset }: { preset: SchedulePreset }) {
-  const props = { size: 22, strokeWidth: 2.1, 'aria-hidden': true } as const;
+  const props = { size: 21, strokeWidth: 2.1, 'aria-hidden': true } as const;
 
   switch (preset) {
     case '2x2': return <RefreshCw {...props} />;
@@ -106,11 +107,11 @@ export function Onboarding({ onCreate }: OnboardingProps) {
   return (
     <main className="screen onboarding-screen">
       <section className="onboarding-brand">
-        <AppIcon size={58} />
-        <div>
-          <div className="eyebrow">Мой график</div>
+        <AppIcon size={52} />
+        <div className="onboarding-brand-copy">
+          <span className="eyebrow">Мой график</span>
           <h1>Настрой смены за минуту</h1>
-          <p>Выбери готовый график или собери свой цикл. Календарь рассчитается автоматически.</p>
+          <p>Выбери готовый график или собери свой цикл.</p>
         </div>
       </section>
 
@@ -123,23 +124,26 @@ export function Onboarding({ onCreate }: OnboardingProps) {
         </div>
 
         <div className="preset-grid" role="radiogroup" aria-label="Тип графика">
-          {PRESETS.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              className={`preset-card ${preset === item.id ? 'is-selected' : ''}`}
-              onClick={() => selectPreset(item.id)}
-              role="radio"
-              aria-checked={preset === item.id}
-            >
-              <span className="preset-icon"><PresetIcon preset={item.id} /></span>
-              <span className="preset-copy">
-                <strong>{PRESET_LABELS[item.id]}</strong>
-                <span>{item.description}</span>
-              </span>
-              <span className="preset-radio" aria-hidden="true" />
-            </button>
-          ))}
+          {PRESETS.map((item) => {
+            const selected = preset === item.id;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                className={`preset-card ${selected ? 'is-selected' : ''}`}
+                onClick={() => selectPreset(item.id)}
+                role="radio"
+                aria-checked={selected}
+              >
+                <span className="preset-icon"><PresetIcon preset={item.id} /></span>
+                <span className="preset-copy">
+                  <strong>{PRESET_LABELS[item.id]}</strong>
+                  <span>{item.description}</span>
+                </span>
+                {selected && <span className="preset-check" aria-hidden="true"><Check size={13} strokeWidth={3} /></span>}
+              </button>
+            );
+          })}
         </div>
       </section>
 
@@ -149,7 +153,7 @@ export function Onboarding({ onCreate }: OnboardingProps) {
             <div>
               <span className="card-kicker">Свой вариант</span>
               <h2>Собери цикл</h2>
-              <p>Добавляй дни по порядку. Нажми на элемент цикла, чтобы удалить его.</p>
+              <p>Добавляй дни по порядку. Нажми на день, чтобы удалить его.</p>
             </div>
             <span className="counter">{customCycle.length}/31</span>
           </div>
@@ -189,8 +193,8 @@ export function Onboarding({ onCreate }: OnboardingProps) {
         <div className="section-heading">
           <div>
             <span className="card-kicker">Шаг 2</span>
-            <h2>Укажи первый день цикла</h2>
-            <p>Выбери дату, с которой начинается выбранный график.</p>
+            <h2>Первый день цикла</h2>
+            <p>Дата, с которой начинается выбранный график.</p>
           </div>
         </div>
         <input
