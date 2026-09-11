@@ -89,6 +89,26 @@
   font-size: 11px;
 }
 
+/* iOS renders date inputs as replaced controls with a fairly large intrinsic width.
+ * Force it to respect the card's content box instead of overflowing to the right. */
+.date-card,
+.date-card .section-heading,
+.date-card .section-heading > div {
+  min-width: 0;
+}
+
+.date-card input[type="date"] {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  inline-size: 100%;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  height: 48px;
+  font-size: 16px;
+}
+
 /* Calendar remains the dominant surface; statistics are intentionally quieter. */
 .stats-section {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.025), 0 6px 18px rgba(0, 0, 0, 0.025);
@@ -96,6 +116,28 @@
 
 .stats-grid {
   margin-top: 10px;
+}
+
+/* VK mobile clients draw their own floating controls over the top-right corner.
+ * Safe-area insets cover the OS status bar but not that VK overlay, so reserve a
+ * dedicated top zone on embedded mobile platforms for our first app control. */
+@media (max-width: 600px) {
+  html[data-vk-platform]:not([data-vk-platform="browser"]):not([data-vk-platform="desktop_web"]) .calendar-screen,
+  html[data-vk-platform]:not([data-vk-platform="browser"]):not([data-vk-platform="desktop_web"]) .settings-screen,
+  html[data-vk-platform]:not([data-vk-platform="browser"]):not([data-vk-platform="desktop_web"]) .onboarding-screen {
+    padding-top: max(72px, calc(env(safe-area-inset-top) + 56px));
+  }
+
+  .onboarding-brand {
+    align-items: flex-start;
+  }
+
+  .onboarding-brand h1 {
+    max-width: 250px;
+    font-size: clamp(22px, 5.8vw, 25px);
+    line-height: 1.08;
+    letter-spacing: -0.45px;
+  }
 }
 
 /* Narrow VK WebViews: preserve rhythm without horizontal overflow. */
@@ -136,6 +178,10 @@
     gap: 8px;
     font-size: 10px;
   }
+
+  .onboarding-brand h1 {
+    font-size: 22px;
+  }
 }
 
 @media (max-width: 330px) {
@@ -148,7 +194,7 @@
   }
 
   .onboarding-brand h1 {
-    font-size: 24px;
+    font-size: 21px;
   }
 }
 
