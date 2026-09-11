@@ -7,6 +7,7 @@ const MIN_OPENS_BEFORE_INTERSTITIAL = 4;
 const INTERSTITIAL_COOLDOWN_MS = 6 * 60 * 60 * 1000;
 
 let interstitialShownThisSession = false;
+let sessionOpenRegistered = false;
 let bannerVisible = false;
 
 function readNumber(key: string): number {
@@ -24,6 +25,16 @@ function writeNumber(key: string, value: number): void {
   } catch {
     // Ads must never affect the product if storage is unavailable.
   }
+}
+
+function currentOpenCount(): number {
+  if (!sessionOpenRegistered) {
+    sessionOpenRegistered = true;
+    const next = readNumber(OPEN_COUNT_KEY) + 1;
+    writeNumber(OPEN_COUNT_KEY, next);
+    return next;
+  }
+  return readNumber(OPEN_COUNT_KEY);
 }
 
 async function supports(method: Parameters<typeof vkBridge.supportsAsync>[0]): Promise<boolean> {
@@ -78,9 +89,7 @@ async function hideBanner(): Promise<void> {
 async function maybeShowInterstitial(): Promise<boolean> {
   if (interstitialShownThisSession || !(await supports('VKWebAppCheckNativeAds'))) return false;
 
-  const opens = readNumber(OPEN_COUNT_KEY) + 1;
-  writeNumber(OPEN_COUNT_KEY, opens);
-
+  const opens = currentOpenCount();
   if (opens < MIN_OPENS_BEFORE_INTERSTITIAL) return false;
 
   const lastShownAt = readNumber(LAST_INTERSTITIAL_KEY);
