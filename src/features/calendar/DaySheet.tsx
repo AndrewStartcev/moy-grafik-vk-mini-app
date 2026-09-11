@@ -1,4 +1,6 @@
-import { SHIFT_ICONS, SHIFT_LABELS, formatHumanDate } from '../../domain/schedule/presentation';
+import { Check, RotateCcw, X } from 'lucide-react';
+import { ShiftIcon } from '../../components/ShiftIcon';
+import { SHIFT_LABELS, formatHumanDate } from '../../domain/schedule/presentation';
 import { resolveDay, withOverride, withoutOverride } from '../../domain/schedule/engine';
 import type { ScheduleConfigV1, ShiftType } from '../../domain/schedule/types';
 import { analytics } from '../../services/analytics';
@@ -8,7 +10,7 @@ const OPTIONS: ShiftType[] = ['day', 'night', 'full_day', 'off', 'vacation', 'si
 function shiftTime(config: ScheduleConfigV1, type: ShiftType): string | null {
   if (type === 'day') return `${config.times.day.start} — ${config.times.day.end}`;
   if (type === 'night') return `${config.times.night.start} — ${config.times.night.end}`;
-  if (type === 'full_day') return '24 часа';
+  if (type === 'full_day') return `${config.times.fullDay.start} — ${config.times.fullDay.end}`;
   return null;
 }
 
@@ -49,10 +51,13 @@ export function DaySheet({ date, config, onChange, onClose }: DaySheetProps) {
         <div className="sheet-handle" aria-hidden="true" />
         <div className="sheet-header">
           <div>
+            <span className="card-kicker">Изменить день</span>
             <h2>{formatHumanDate(date)}</h2>
-            <p>По графику: {SHIFT_LABELS[resolved.baseShift]}</p>
+            <p>По базовому графику: {SHIFT_LABELS[resolved.baseShift]}</p>
           </div>
-          <button type="button" className="icon-button" onClick={onClose} aria-label="Закрыть">×</button>
+          <button type="button" className="icon-button" onClick={onClose} aria-label="Закрыть">
+            <X size={20} />
+          </button>
         </div>
 
         <div className="shift-options">
@@ -66,12 +71,14 @@ export function DaySheet({ date, config, onChange, onClose }: DaySheetProps) {
                 className={`shift-option shift-${type} ${checked ? 'is-current' : ''}`}
                 onClick={() => choose(type)}
               >
-                <span className="shift-option-icon" aria-hidden="true">{SHIFT_ICONS[type]}</span>
+                <span className="shift-option-icon" aria-hidden="true"><ShiftIcon type={type} size={20} /></span>
                 <span className="shift-option-copy">
                   <strong>{SHIFT_LABELS[type]}</strong>
-                  {time && <small>{time}</small>}
+                  <small>{time ?? (type === 'off' ? 'Без смены' : type === 'vacation' ? 'Отпуск' : 'Больничный')}</small>
                 </span>
-                <span className={`radio-dot ${checked ? 'is-checked' : ''}`} aria-hidden="true" />
+                <span className={`radio-dot ${checked ? 'is-checked' : ''}`} aria-hidden="true">
+                  {checked && <Check size={13} strokeWidth={3} />}
+                </span>
               </button>
             );
           })}
@@ -79,7 +86,8 @@ export function DaySheet({ date, config, onChange, onClose }: DaySheetProps) {
 
         {resolved.isOverride && (
           <button type="button" className="restore-button" onClick={restore}>
-            ↻ Вернуть по графику
+            <RotateCcw size={18} />
+            Вернуть по графику
           </button>
         )}
       </section>
