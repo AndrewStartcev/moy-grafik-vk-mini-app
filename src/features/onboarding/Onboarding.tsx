@@ -46,6 +46,23 @@ const SHORT: Record<CycleShiftType, string> = {
   off: 'В',
 };
 
+const MONTHS_SHORT = [
+  'янв.', 'февр.', 'мар.', 'апр.', 'мая', 'июн.',
+  'июл.', 'авг.', 'сент.', 'окт.', 'нояб.', 'дек.',
+];
+
+function formatAnchorDate(value: string): string {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) return value;
+
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  if (!MONTHS_SHORT[month - 1]) return value;
+
+  return `${day} ${MONTHS_SHORT[month - 1]} ${year} г.`;
+}
+
 function PresetIcon({ preset }: { preset: SchedulePreset }) {
   const props = { size: 21, strokeWidth: 2.1, 'aria-hidden': true } as const;
 
@@ -195,13 +212,19 @@ export function Onboarding({ onCreate }: OnboardingProps) {
             <p>Дата, с которой начинается выбранный график.</p>
           </div>
         </div>
-        <input
-          id="anchor-date"
-          aria-label="Первый день цикла"
-          type="date"
-          value={anchorDate}
-          onChange={(event) => setAnchorDate(event.target.value)}
-        />
+
+        <label className="native-picker-field date-picker-field" htmlFor="anchor-date">
+          <span className="native-picker-value">{formatAnchorDate(anchorDate)}</span>
+          <CalendarDays className="native-picker-icon" size={18} aria-hidden="true" />
+          <input
+            id="anchor-date"
+            className="native-picker-input"
+            aria-label="Первый день цикла"
+            type="date"
+            value={anchorDate}
+            onChange={(event) => setAnchorDate(event.target.value)}
+          />
+        </label>
       </section>
 
       <div className="onboarding-submit">
