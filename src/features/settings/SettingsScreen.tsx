@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   ArrowLeft,
   CalendarDays,
@@ -41,6 +42,8 @@ export function SettingsScreen({
   onReconfigure,
   onReset,
 }: SettingsScreenProps) {
+  const [resetConfirmationVisible, setResetConfirmationVisible] = useState(false);
+
   const updateTime = (key: TimeKey, field: 'start' | 'end', value: string) => {
     analytics.track('shift_time_changed', { shift_type: key });
     onChange({
@@ -55,11 +58,10 @@ export function SettingsScreen({
     });
   };
 
-  const reset = () => {
-    if (window.confirm('Сбросить график и все ручные изменения?')) {
-      analytics.track('schedule_reset');
-      onReset();
-    }
+  const confirmReset = () => {
+    analytics.track('schedule_reset');
+    setResetConfirmationVisible(false);
+    onReset();
   };
 
   return (
@@ -168,10 +170,31 @@ export function SettingsScreen({
       </div>
 
       <div className="settings-group danger-group">
-        <button type="button" className="danger-row" onClick={reset}>
-          <Trash2 size={19} />
-          <span>Сбросить график</span>
-        </button>
+        {!resetConfirmationVisible ? (
+          <button
+            type="button"
+            className="danger-row"
+            onClick={() => setResetConfirmationVisible(true)}
+          >
+            <Trash2 size={19} />
+            <span>Сбросить график</span>
+          </button>
+        ) : (
+          <div className="reset-confirmation" role="group" aria-label="Подтверждение сброса графика">
+            <div className="reset-confirmation-copy">
+              <strong>Сбросить график?</strong>
+              <span>Удалятся настройки и ручные изменения.</span>
+            </div>
+            <div className="reset-confirmation-actions">
+              <button type="button" className="reset-cancel" onClick={() => setResetConfirmationVisible(false)}>
+                Отмена
+              </button>
+              <button type="button" className="reset-confirm" onClick={confirmReset}>
+                Сбросить
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </main>
   );
