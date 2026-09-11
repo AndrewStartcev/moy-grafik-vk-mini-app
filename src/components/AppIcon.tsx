@@ -1,3 +1,5 @@
+import { CalendarDays } from 'lucide-react';
+
 interface AppIconProps {
   size?: number;
   className?: string;
@@ -6,14 +8,18 @@ interface AppIconProps {
 
 export function AppIcon({ size = 44, className = '', decorative = true }: AppIconProps) {
   return (
-    <img
-      src="/app-icon.png"
-      width={size}
-      height={size}
+    <span
       className={`app-icon ${className}`.trim()}
-      alt={decorative ? '' : 'Мой график'}
+      style={{ width: size, height: size }}
+      role={decorative ? undefined : 'img'}
+      aria-label={decorative ? undefined : 'Мой график'}
       aria-hidden={decorative || undefined}
-      draggable={false}
-    />
+    >
+      <CalendarDays
+        size={Math.round(size * 0.53)}
+        strokeWidth={2.35}
+        aria-hidden="true"
+      />
+    </span>
   );
 }
