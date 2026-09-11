@@ -19,13 +19,14 @@
 
 ## 2. VK application
 
-Нужно зафиксировать:
-
 ```text
-VK App ID: TBD
+VK App ID: 54765581
+Public URL: https://vk.ru/app54765581
 Production URL: TBD
 Development URL / tunnel: TBD
 ```
+
+В корне проекта используется `vk-hosting-config.json` с `app_id: 54765581` и статикой из `dist`.
 
 Настройки VK выполняются владельцем аккаунта там, где требуется его авторизация. Разработчик даёт точные значения и последовательность действий.
 
