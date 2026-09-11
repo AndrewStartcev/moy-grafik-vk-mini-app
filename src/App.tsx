@@ -106,7 +106,14 @@ function Application() {
   if (loading) {
     return (
       <main className="screen loading-screen">
-        <img className="loading-app-icon" src="/assets/app-icon-256.png" alt="" aria-hidden="true" />
+        <img
+          src="/assets/app-icon-256.png"
+          alt=""
+          aria-hidden="true"
+          width={64}
+          height={64}
+          style={{ borderRadius: 18, objectFit: 'cover' }}
+        />
         <strong>Мой график</strong>
         <span className="loading-spinner" aria-label="Загрузка" />
       </main>
