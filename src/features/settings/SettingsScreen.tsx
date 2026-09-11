@@ -94,7 +94,11 @@ export function SettingsScreen({
         <section className="settings-list time-settings-list">
           {(Object.keys(TIME_LABELS) as TimeKey[]).map((key) => (
             <div className="time-setting" key={key}>
-              <span className={`settings-row-icon shift-${TIME_SHIFT_TYPES[key]}`} aria-hidden="true">
+              <span
+                className={`settings-row-icon shift-${TIME_SHIFT_TYPES[key]}`}
+                style={{ background: 'var(--shift-bg)', color: 'var(--shift-fg)' }}
+                aria-hidden="true"
+              >
                 <ShiftIcon type={TIME_SHIFT_TYPES[key]} size={20} />
               </span>
 
