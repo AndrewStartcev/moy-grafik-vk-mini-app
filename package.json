@@ -23,6 +23,7 @@
     "@vkontakte/vk-bridge-react": "^2.0.1",
     "@vkontakte/vk-mini-apps-router": "^1.8.6",
     "@vkontakte/vkui": "^8.0.0",
+    "lucide-react": "^0.468.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
