@@ -109,22 +109,30 @@ export function SettingsScreen({
                 <div className="time-inputs">
                   <label className="time-field">
                     <span>Начало</span>
-                    <input
-                      type="time"
-                      aria-label={`${TIME_LABELS[key]} начало`}
-                      value={config.times[key].start}
-                      onChange={(event) => updateTime(key, 'start', event.target.value)}
-                    />
+                    <span className="native-picker-field time-picker-field">
+                      <span className="native-picker-value">{config.times[key].start}</span>
+                      <input
+                        className="native-picker-input"
+                        type="time"
+                        aria-label={`${TIME_LABELS[key]} начало`}
+                        value={config.times[key].start}
+                        onChange={(event) => updateTime(key, 'start', event.target.value)}
+                      />
+                    </span>
                   </label>
                   <span className="time-separator" aria-hidden="true">—</span>
                   <label className="time-field">
                     <span>Конец</span>
-                    <input
-                      type="time"
-                      aria-label={`${TIME_LABELS[key]} конец`}
-                      value={config.times[key].end}
-                      onChange={(event) => updateTime(key, 'end', event.target.value)}
-                    />
+                    <span className="native-picker-field time-picker-field">
+                      <span className="native-picker-value">{config.times[key].end}</span>
+                      <input
+                        className="native-picker-input"
+                        type="time"
+                        aria-label={`${TIME_LABELS[key]} конец`}
+                        value={config.times[key].end}
+                        onChange={(event) => updateTime(key, 'end', event.target.value)}
+                      />
+                    </span>
                   </label>
                 </div>
               </div>
