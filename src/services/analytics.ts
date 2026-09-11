@@ -17,6 +17,9 @@ export type AnalyticsEvent =
   | 'settings_open'
   | 'schedule_reset'
   | 'shift_time_changed'
+  | 'story_opened'
+  | 'story_unavailable'
+  | 'story_failed'
   | 'ad_request'
   | 'ad_shown'
   | 'ad_failed';
