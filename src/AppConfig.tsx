@@ -41,8 +41,17 @@ export function AppConfig() {
     document.documentElement.dataset.vkPlatform = vkPlatform.platform ?? 'browser';
     document.documentElement.style.colorScheme = appearance;
 
+    const background = appearance === 'dark' ? '#19191a' : '#f2f3f5';
     const themeColor = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
-    themeColor?.setAttribute('content', appearance === 'dark' ? '#19191a' : '#f2f3f5');
+    themeColor?.setAttribute('content', background);
+
+    if (vkBridge.isWebView()) {
+      void vkBridge.send('VKWebAppSetViewSettings', {
+        status_bar_style: appearance === 'dark' ? 'light' : 'dark',
+        action_bar_color: background,
+        navigation_bar_color: background,
+      }).catch(() => undefined);
+    }
   }, [appearance]);
 
   return (
