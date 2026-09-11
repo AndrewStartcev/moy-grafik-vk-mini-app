@@ -12,11 +12,12 @@
 
 .time-field input {
   display: block;
-  width: 100%;
-  min-width: 0;
-  max-width: 100%;
-  inline-size: 100%;
-  max-inline-size: 100%;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  inline-size: 100% !important;
+  min-inline-size: 0 !important;
+  max-inline-size: 100% !important;
   height: 44px;
   padding-inline: 10px;
   box-sizing: border-box;
@@ -25,6 +26,7 @@
 
 .time-field input::-webkit-date-and-time-value {
   min-width: 0;
+  width: 100%;
   margin: 0;
   text-align: left;
 }
@@ -73,6 +75,20 @@
   font-size: 10px;
 }
 
+/* Text-only product branding in the top area. */
+.brand-inline-text-only {
+  gap: 0;
+}
+
+.onboarding-brand-text-only {
+  display: block;
+  margin-left: 2px;
+}
+
+.onboarding-brand-text-only .onboarding-brand-copy {
+  width: 100%;
+}
+
 /* Settings: slightly calmer rhythm and mobile-safe native time controls. */
 .time-setting {
   min-width: 0;
@@ -82,6 +98,7 @@
 
 .time-setting-body {
   min-width: 0;
+  width: 100%;
   max-width: 100%;
   overflow: hidden;
 }
@@ -90,12 +107,14 @@
   margin-bottom: 9px;
 }
 
+/* Explicit percentage columns avoid Safari/iOS intrinsic input widths expanding the grid. */
 .time-inputs {
   width: 100%;
   max-width: 270px;
   min-width: 0;
-  grid-template-columns: minmax(0, 1fr) 12px minmax(0, 1fr);
-  gap: 6px;
+  display: grid;
+  grid-template-columns: 45% 10% 45%;
+  gap: 0;
   overflow: hidden;
 }
 
@@ -104,11 +123,14 @@
   min-width: 0;
   max-width: 100%;
   overflow: hidden;
+  box-sizing: border-box;
 }
 
 .time-separator {
   min-width: 0;
+  width: 100%;
   padding-bottom: 14px;
+  text-align: center;
 }
 
 /* VK WebView does not reliably render window.confirm, so reset confirmation lives in-app. */
@@ -204,22 +226,27 @@ html[data-vk-platform]:not([data-vk-platform="browser"]) .onboarding-brand h1 {
 
 .date-card {
   min-width: 0;
+  width: 100%;
+  max-width: 100%;
   overflow: hidden;
+  box-sizing: border-box;
 }
 
 .date-card input[type="date"] {
   display: block;
-  width: 100%;
-  min-width: 0;
-  max-width: 100%;
-  inline-size: 100%;
-  max-inline-size: 100%;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  inline-size: 100% !important;
+  min-inline-size: 0 !important;
+  max-inline-size: 100% !important;
   box-sizing: border-box;
   overflow: hidden;
 }
 
 .date-card input[type="date"]::-webkit-date-and-time-value {
   min-width: 0;
+  width: 100%;
   margin: 0;
   text-align: left;
 }
@@ -228,6 +255,40 @@ html[data-vk-platform]:not([data-vk-platform="browser"]) .onboarding-brand h1 {
   flex: 0 0 auto;
   margin: 0;
   padding: 0;
+}
+
+/* Safari/iOS keeps intrinsic sizes for date/time controls unless every layer is constrained. */
+@supports (-webkit-touch-callout: none) {
+  .time-inputs {
+    width: 100%;
+    max-width: 100%;
+    grid-template-columns: 45% 10% 45%;
+  }
+
+  .time-field,
+  .time-field input[type="time"] {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    inline-size: 100% !important;
+    min-inline-size: 0 !important;
+    max-inline-size: 100% !important;
+    box-sizing: border-box;
+  }
+
+  .time-field input[type="time"],
+  .date-card input[type="date"] {
+    font-size: 16px;
+  }
+
+  .date-card input[type="date"] {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    inline-size: 100% !important;
+    min-inline-size: 100% !important;
+    max-inline-size: 100% !important;
+  }
 }
 
 /* Narrow VK WebViews: preserve rhythm without horizontal overflow. */
@@ -249,14 +310,15 @@ html[data-vk-platform]:not([data-vk-platform="browser"]) .onboarding-brand h1 {
   }
 
   .time-inputs {
+    width: 100%;
     max-width: 100%;
-    grid-template-columns: minmax(0, 1fr) 10px minmax(0, 1fr);
-    gap: 4px;
+    grid-template-columns: 45% 10% 45%;
+    gap: 0;
   }
 
   .time-field input {
-    padding-inline: 8px;
-    font-size: 13px;
+    padding-inline: 7px;
+    font-size: 16px;
   }
 }
 
