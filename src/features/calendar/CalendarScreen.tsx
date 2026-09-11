@@ -8,7 +8,6 @@ import {
   Settings,
   Share2,
 } from 'lucide-react';
-import { AppIcon } from '../../components/AppIcon';
 import { ShiftIcon } from '../../components/ShiftIcon';
 import {
   daysInMonth,
@@ -120,8 +119,7 @@ export function CalendarScreen({ config, onChange, onOpenSettings }: CalendarScr
   return (
     <main className="screen calendar-screen">
       <header className="app-header">
-        <div className="brand-inline">
-          <AppIcon size={44} />
+        <div className="brand-inline brand-inline-text-only">
           <div className="brand-copy">
             <strong>Мой график</strong>
             <small>Календарь смен</small>
