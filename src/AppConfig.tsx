@@ -9,6 +9,7 @@ import { vkPlatform } from './services/vkPlatform';
 import './styles/app.css';
 import './styles/theme.css';
 import './styles/polish.css';
+import './styles/story.css';
 
 type AppAppearance = 'light' | 'dark';
 
