@@ -1,0 +1,147 @@
+/*
+ * Application theme layer.
+ * VKUI provides the base semantic palette; these tokens cover custom surfaces
+ * and shift-state colors that are outside VKUI components.
+ */
+
+:root {
+  --app-glow: rgba(38, 136, 235, 0.11);
+  --accent-soft: rgba(38, 136, 235, 0.10);
+  --accent-soft-strong: #e6f2ff;
+  --danger-soft: rgba(230, 70, 70, 0.09);
+
+  --shift-day-bg: #e3f1ff;
+  --shift-day-fg: #1479dd;
+  --shift-night-bg: #eee8ff;
+  --shift-night-fg: #6b50ce;
+  --shift-full-bg: #dcecff;
+  --shift-full-fg: #0569d4;
+  --shift-vacation-bg: #e2f7e9;
+  --shift-vacation-fg: #208a4d;
+  --shift-sick-bg: #fff0df;
+  --shift-sick-fg: #c76723;
+
+  --legend-work: #c4e3ff;
+  --legend-off: #eceff2;
+  --legend-night: #dfd4ff;
+  --theme-card-shadow: 0 1px 2px rgba(0, 0, 0, 0.035), 0 10px 28px rgba(0, 0, 0, 0.035);
+}
+
+:root[data-app-appearance='dark'] {
+  --app-glow: rgba(64, 156, 255, 0.10);
+  --accent-soft: rgba(82, 160, 255, 0.14);
+  --accent-soft-strong: rgba(82, 160, 255, 0.16);
+  --danger-soft: rgba(230, 70, 70, 0.14);
+
+  --shift-day-bg: #17344e;
+  --shift-day-fg: #6fbdff;
+  --shift-night-bg: #30284b;
+  --shift-night-fg: #b9a3ff;
+  --shift-full-bg: #173d62;
+  --shift-full-fg: #7fc1ff;
+  --shift-vacation-bg: #193b2b;
+  --shift-vacation-fg: #72d89a;
+  --shift-sick-bg: #4a301e;
+  --shift-sick-fg: #f4aa68;
+
+  --legend-work: #315a7d;
+  --legend-off: #3b4048;
+  --legend-night: #514478;
+  --theme-card-shadow: 0 1px 2px rgba(0, 0, 0, 0.20), 0 10px 30px rgba(0, 0, 0, 0.16);
+}
+
+.app-shell {
+  background:
+    radial-gradient(circle at 50% -120px, var(--app-glow), transparent 330px),
+    var(--app-bg);
+}
+
+.calendar-card,
+.stats-section,
+.today-card,
+.custom-cycle-card,
+.date-card,
+.settings-list,
+.fatal-card {
+  box-shadow: var(--theme-card-shadow);
+}
+
+.shift-day {
+  --shift-bg: var(--shift-day-bg);
+  --shift-fg: var(--shift-day-fg);
+}
+
+.shift-night {
+  --shift-bg: var(--shift-night-bg);
+  --shift-fg: var(--shift-night-fg);
+}
+
+.shift-full_day {
+  --shift-bg: var(--shift-full-bg);
+  --shift-fg: var(--shift-full-fg);
+}
+
+.shift-vacation {
+  --shift-bg: var(--shift-vacation-bg);
+  --shift-fg: var(--shift-vacation-fg);
+}
+
+.shift-sick {
+  --shift-bg: var(--shift-sick-bg);
+  --shift-fg: var(--shift-sick-fg);
+}
+
+.next-shift-icon,
+.stat-card-icon,
+.preset-icon {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.settings-row-icon.accent,
+.settings-row-icon.neutral {
+  background: var(--accent-soft-strong);
+  color: var(--accent);
+}
+
+.legend-dot.work {
+  background: var(--legend-work);
+}
+
+.legend-dot.off {
+  background: var(--legend-off);
+}
+
+.legend-dot.night {
+  background: var(--legend-night);
+}
+
+.danger-row {
+  background: var(--danger-soft);
+}
+
+:root[data-app-appearance='dark'] .app-icon {
+  box-shadow:
+    0 6px 20px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+:root[data-app-appearance='dark'] .preset-card.is-selected {
+  border-color: #52a0ff;
+  box-shadow:
+    inset 0 0 0 1px rgba(82, 160, 255, 0.34),
+    0 6px 20px rgba(0, 0, 0, 0.12);
+}
+
+:root[data-app-appearance='dark'] .legend-dot.today,
+:root[data-app-appearance='dark'] .calendar-day.is-today {
+  border-color: #52a0ff;
+}
+
+:root[data-app-appearance='dark'] .calendar-day.is-today {
+  box-shadow: inset 0 0 0 1px #52a0ff;
+}
+
+:root[data-app-appearance='dark'] .day-sheet {
+  box-shadow: 0 -16px 54px rgba(0, 0, 0, 0.38);
+}
