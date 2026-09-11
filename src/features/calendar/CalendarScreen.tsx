@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   CalendarClock,
   CalendarDays,
@@ -26,6 +26,7 @@ import {
 } from '../../domain/schedule/presentation';
 import { calculateMonthStatistics } from '../../domain/schedule/statistics';
 import type { ScheduleConfigV1, ShiftType } from '../../domain/schedule/types';
+import { ads } from '../../services/ads';
 import { analytics } from '../../services/analytics';
 import { DaySheet } from './DaySheet';
 
@@ -49,6 +50,22 @@ export function CalendarScreen({ config, onChange, onOpenSettings }: CalendarScr
   const current = parseDateKey(today);
   const [view, setView] = useState({ year: current.year, month: current.month });
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+
+    const startAds = async () => {
+      await ads.maybeShowInterstitial();
+      if (active) await ads.showBanner();
+    };
+
+    void startAds();
+
+    return () => {
+      active = false;
+      void ads.hideBanner();
+    };
+  }, []);
 
   const todayResolved = resolveDay(config, today);
   const nextShift = findNextWorkShift(config, today);
