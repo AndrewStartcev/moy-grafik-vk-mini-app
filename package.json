@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
+  "homepage": "./",
   "engines": {
     "node": ">=22.12.0"
   },
@@ -15,7 +16,8 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "test": "vitest run",
     "test:watch": "vitest",
-    "deploy": "vite build && vk-miniapps-deploy"
+    "predeploy": "npm run build",
+    "deploy": "vk-miniapps-deploy"
   },
   "dependencies": {
     "@vkontakte/icons": "^3.1.1",
@@ -33,7 +35,7 @@
     "@typescript-eslint/eslint-plugin": "^6.14.0",
     "@typescript-eslint/parser": "^6.14.0",
     "@vitejs/plugin-react": "^6.0.2",
-    "@vkontakte/vk-miniapps-deploy": "^0.1.6",
+    "@vkontakte/vk-miniapps-deploy": "^1.0.2",
     "eslint": "^8.55.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
