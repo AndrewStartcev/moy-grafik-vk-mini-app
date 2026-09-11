@@ -96,23 +96,30 @@ export function CalendarScreen({ config, onChange, onOpenSettings }: CalendarScr
       <section className={`today-card shift-${todayResolved.shift}`}>
         <div className="today-main">
           <div className="today-icon" aria-hidden="true">
-            <ShiftIcon type={todayResolved.shift} size={26} strokeWidth={2.1} />
+            <ShiftIcon type={todayResolved.shift} size={25} strokeWidth={2.1} />
           </div>
           <div className="today-content">
             <span>Сегодня, {formatShortHumanDate(today)}</span>
             <h1>{SHIFT_LABELS[todayResolved.shift]}</h1>
-            {shiftTime(config, todayResolved.shift) && <strong>{shiftTime(config, todayResolved.shift)}</strong>}
+            {shiftTime(config, todayResolved.shift) && (
+              <strong>{shiftTime(config, todayResolved.shift)}</strong>
+            )}
           </div>
         </div>
 
         {nextShift && (
           <button type="button" className="next-shift" onClick={() => openDay(nextShift.date)}>
-            <span className="next-shift-icon" aria-hidden="true"><CalendarClock size={18} /></span>
-            <span>
-              <small>Следующая смена</small>
-              <strong>{formatShortHumanDate(nextShift.date)} · через {nextShift.daysAway} {pluralDays(nextShift.daysAway)}</strong>
+            <span className="next-shift-icon" aria-hidden="true">
+              <CalendarClock size={18} />
             </span>
-            <ChevronRight size={18} aria-hidden="true" />
+            <span className="next-shift-copy">
+              <span>Следующая смена</span>
+              <strong>
+                {formatShortHumanDate(nextShift.date)} · через {nextShift.daysAway}{' '}
+                {pluralDays(nextShift.daysAway)}
+              </strong>
+            </span>
+            <ChevronRight className="next-shift-chevron" size={18} aria-hidden="true" />
           </button>
         )}
       </section>
@@ -146,6 +153,7 @@ export function CalendarScreen({ config, onChange, onOpenSettings }: CalendarScr
             const date = formatDateKey(view.year, view.month, day);
             const resolved = resolveDay(config, date);
             const isToday = date === today;
+
             return (
               <button
                 type="button"
@@ -163,9 +171,10 @@ export function CalendarScreen({ config, onChange, onOpenSettings }: CalendarScr
         </div>
 
         <div className="calendar-legend" aria-label="Обозначения">
-          <span><i className="legend-dot legend-work" />Работа</span>
-          <span><i className="legend-dot legend-off" />Выходной</span>
-          <span><i className="legend-ring" />Сегодня</span>
+          <span className="legend-item"><i className="legend-dot work" />Работа</span>
+          <span className="legend-item"><i className="legend-dot off" />Выходной</span>
+          <span className="legend-item"><i className="legend-dot night" />Ночь</span>
+          <span className="legend-item"><i className="legend-dot today" />Сегодня</span>
         </div>
       </section>
 
@@ -180,17 +189,17 @@ export function CalendarScreen({ config, onChange, onOpenSettings }: CalendarScr
 
         <div className="stats-grid">
           <div className="stat-card">
-            <span className="stat-icon"><CalendarDays size={18} /></span>
+            <span className="stat-card-icon"><CalendarDays size={18} /></span>
             <strong>{stats.workShiftCount}</strong>
             <span>смен</span>
           </div>
           <div className="stat-card">
-            <span className="stat-icon"><Clock3 size={18} /></span>
+            <span className="stat-card-icon"><Clock3 size={18} /></span>
             <strong>{stats.totalWorkHours}</strong>
             <span>часов</span>
           </div>
           <div className="stat-card">
-            <span className="stat-icon"><ShiftIcon type="off" size={18} /></span>
+            <span className="stat-card-icon"><ShiftIcon type="off" size={18} /></span>
             <strong>{stats.offCount}</strong>
             <span>выходных</span>
           </div>
