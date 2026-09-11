@@ -11,8 +11,28 @@
 }
 
 .time-field input {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  inline-size: 100%;
+  max-inline-size: 100%;
   height: 44px;
-  padding-inline: 11px;
+  padding-inline: 10px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.time-field input::-webkit-date-and-time-value {
+  min-width: 0;
+  margin: 0;
+  text-align: left;
+}
+
+.time-field input::-webkit-calendar-picker-indicator {
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 0;
 }
 
 .cycle-actions button {
@@ -53,10 +73,17 @@
   font-size: 10px;
 }
 
-/* Settings: slightly calmer rhythm and better aligned native time controls. */
+/* Settings: slightly calmer rhythm and mobile-safe native time controls. */
 .time-setting {
+  min-width: 0;
   padding-top: 14px;
   padding-bottom: 14px;
+}
+
+.time-setting-body {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .time-setting-body > strong {
@@ -64,12 +91,76 @@
 }
 
 .time-inputs {
-  grid-template-columns: minmax(82px, 1fr) 16px minmax(82px, 1fr);
+  width: 100%;
   max-width: 270px;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr) 12px minmax(0, 1fr);
+  gap: 6px;
+  overflow: hidden;
+}
+
+.time-field {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .time-separator {
+  min-width: 0;
   padding-bottom: 14px;
+}
+
+/* VK WebView does not reliably render window.confirm, so reset confirmation lives in-app. */
+.reset-confirmation {
+  padding: 14px;
+  border: 1px solid color-mix(in srgb, var(--danger) 22%, var(--separator));
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--danger) 7%, var(--surface));
+}
+
+.reset-confirmation-copy strong,
+.reset-confirmation-copy span {
+  display: block;
+}
+
+.reset-confirmation-copy strong {
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.reset-confirmation-copy span {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.reset-confirmation-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.reset-confirmation-actions button {
+  min-height: 44px;
+  border: 0;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.reset-cancel {
+  background: var(--surface-secondary);
+  color: var(--text);
+}
+
+.reset-confirm {
+  background: var(--danger);
+  color: #fff;
 }
 
 /* Onboarding: keep the full choice visible without making cards feel cramped. */
@@ -89,26 +180,6 @@
   font-size: 11px;
 }
 
-/* iOS renders date inputs as replaced controls with a fairly large intrinsic width.
- * Force it to respect the card's content box instead of overflowing to the right. */
-.date-card,
-.date-card .section-heading,
-.date-card .section-heading > div {
-  min-width: 0;
-}
-
-.date-card input[type="date"] {
-  display: block;
-  width: 100%;
-  min-width: 0;
-  max-width: 100%;
-  inline-size: 100%;
-  min-inline-size: 0;
-  max-inline-size: 100%;
-  height: 48px;
-  font-size: 16px;
-}
-
 /* Calendar remains the dominant surface; statistics are intentionally quieter. */
 .stats-section {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.025), 0 6px 18px rgba(0, 0, 0, 0.025);
@@ -118,29 +189,77 @@
   margin-top: 10px;
 }
 
-/* VK mobile clients draw their own floating controls over the top-right corner.
- * Safe-area insets cover the OS status bar but not that VK overlay, so reserve a
- * dedicated top zone on embedded mobile platforms for our first app control. */
-@media (max-width: 600px) {
-  html[data-vk-platform]:not([data-vk-platform="browser"]):not([data-vk-platform="desktop_web"]) .calendar-screen,
-  html[data-vk-platform]:not([data-vk-platform="browser"]):not([data-vk-platform="desktop_web"]) .settings-screen,
-  html[data-vk-platform]:not([data-vk-platform="browser"]):not([data-vk-platform="desktop_web"]) .onboarding-screen {
-    padding-top: max(72px, calc(env(safe-area-inset-top) + 56px));
-  }
+/* VK mobile WebView overlays its own controls in the upper-right corner. */
+html[data-vk-platform]:not([data-vk-platform="browser"]) .onboarding-screen,
+html[data-vk-platform]:not([data-vk-platform="browser"]) .settings-screen,
+html[data-vk-platform]:not([data-vk-platform="browser"]) .calendar-screen {
+  padding-top: max(68px, calc(env(safe-area-inset-top) + 42px));
+}
 
-  .onboarding-brand {
-    align-items: flex-start;
-  }
+html[data-vk-platform]:not([data-vk-platform="browser"]) .onboarding-brand h1 {
+  max-width: 250px;
+  font-size: clamp(22px, 5.5vw, 26px);
+  line-height: 1.08;
+}
 
-  .onboarding-brand h1 {
-    max-width: 250px;
-    font-size: clamp(22px, 5.8vw, 25px);
-    line-height: 1.08;
-    letter-spacing: -0.45px;
-  }
+.date-card {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.date-card input[type="date"] {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  inline-size: 100%;
+  max-inline-size: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.date-card input[type="date"]::-webkit-date-and-time-value {
+  min-width: 0;
+  margin: 0;
+  text-align: left;
+}
+
+.date-card input[type="date"]::-webkit-calendar-picker-indicator {
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 0;
 }
 
 /* Narrow VK WebViews: preserve rhythm without horizontal overflow. */
+@media (max-width: 390px) {
+  .onboarding-brand h1 {
+    font-size: 23px;
+  }
+
+  .time-setting {
+    grid-template-columns: 36px minmax(0, 1fr);
+    gap: 10px;
+    padding-right: 10px;
+    padding-left: 10px;
+  }
+
+  .time-setting .settings-row-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .time-inputs {
+    max-width: 100%;
+    grid-template-columns: minmax(0, 1fr) 10px minmax(0, 1fr);
+    gap: 4px;
+  }
+
+  .time-field input {
+    padding-inline: 8px;
+    font-size: 13px;
+  }
+}
+
 @media (max-width: 360px) {
   .screen {
     padding-right: 10px;
@@ -169,18 +288,9 @@
     padding: 12px;
   }
 
-  .time-inputs {
-    grid-template-columns: minmax(74px, 1fr) 12px minmax(74px, 1fr);
-    gap: 5px;
-  }
-
   .calendar-legend {
     gap: 8px;
     font-size: 10px;
-  }
-
-  .onboarding-brand h1 {
-    font-size: 22px;
   }
 }
 
@@ -194,7 +304,15 @@
   }
 
   .onboarding-brand h1 {
-    font-size: 21px;
+    font-size: 22px;
+  }
+
+  .time-setting {
+    grid-template-columns: 1fr;
+  }
+
+  .time-setting > .settings-row-icon {
+    display: none !important;
   }
 }
 
