@@ -1,0 +1,43 @@
+{
+  "name": "moy-grafik-vk-mini-app",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "start": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -b --pretty false",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "deploy": "vite build && vk-miniapps-deploy"
+  },
+  "dependencies": {
+    "@vkontakte/icons": "^3.1.1",
+    "@vkontakte/vk-bridge": "^3.0.2",
+    "@vkontakte/vk-bridge-react": "^2.0.1",
+    "@vkontakte/vk-mini-apps-router": "^1.8.6",
+    "@vkontakte/vkui": "^8.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.43",
+    "@types/react-dom": "^18.2.17",
+    "@typescript-eslint/eslint-plugin": "^6.14.0",
+    "@typescript-eslint/parser": "^6.14.0",
+    "@vitejs/plugin-react": "^6.0.2",
+    "@vkontakte/vk-miniapps-deploy": "^0.1.6",
+    "eslint": "^8.55.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.5",
+    "typescript": "^5.2.2",
+    "vite": "^8.0.16",
+    "vitest": "^5.0.0"
+  }
+}
