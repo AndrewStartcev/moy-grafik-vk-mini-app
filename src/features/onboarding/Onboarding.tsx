@@ -1,5 +1,15 @@
 import { useMemo, useState } from 'react';
 import { Button } from '@vkontakte/vkui';
+import {
+  BriefcaseBusiness,
+  CalendarDays,
+  Clock3,
+  RefreshCw,
+  SlidersHorizontal,
+  SunMoon,
+} from 'lucide-react';
+import { AppIcon } from '../../components/AppIcon';
+import { ShiftIcon } from '../../components/ShiftIcon';
 import { createScheduleConfig } from '../../domain/schedule/config';
 import { PRESET_LABELS } from '../../domain/schedule/presets';
 import { todayDateKey } from '../../domain/schedule/date';
@@ -13,21 +23,20 @@ import { analytics } from '../../services/analytics';
 const PRESETS: Array<{
   id: SchedulePreset;
   description: string;
-  icon: string;
 }> = [
-  { id: '2x2', description: '2 рабочих · 2 выходных', icon: '↻' },
-  { id: '3x3', description: '3 рабочих · 3 выходных', icon: '▦' },
-  { id: '1x3', description: '1 смена (24 ч) · 3 выходных', icon: '◐' },
-  { id: 'day-night-48', description: 'Чередование дневных и ночных', icon: '☀︎ · ☾' },
-  { id: '5x2', description: '5 рабочих · 2 выходных', icon: '▣' },
-  { id: 'custom', description: 'Настрой свой вариант', icon: '⚙' },
+  { id: '2x2', description: '2 рабочих · 2 выходных' },
+  { id: '3x3', description: '3 рабочих · 3 выходных' },
+  { id: '1x3', description: '1 смена (24 ч) · 3 выходных' },
+  { id: 'day-night-48', description: 'День · ночь · 2 выходных' },
+  { id: '5x2', description: '5 рабочих · 2 выходных' },
+  { id: 'custom', description: 'Настрой свой повторяющийся цикл' },
 ];
 
 const CUSTOM_OPTIONS: Array<{ type: CycleShiftType; label: string }> = [
-  { type: 'day', label: '+ Дневная' },
-  { type: 'night', label: '+ Ночная' },
-  { type: 'full_day', label: '+ Сутки' },
-  { type: 'off', label: '+ Выходной' },
+  { type: 'day', label: 'Дневная' },
+  { type: 'night', label: 'Ночная' },
+  { type: 'full_day', label: 'Сутки' },
+  { type: 'off', label: 'Выходной' },
 ];
 
 const SHORT: Record<CycleShiftType, string> = {
@@ -36,6 +45,19 @@ const SHORT: Record<CycleShiftType, string> = {
   full_day: '24',
   off: 'В',
 };
+
+function PresetIcon({ preset }: { preset: SchedulePreset }) {
+  const props = { size: 22, strokeWidth: 2.1, 'aria-hidden': true } as const;
+
+  switch (preset) {
+    case '2x2': return <RefreshCw {...props} />;
+    case '3x3': return <CalendarDays {...props} />;
+    case '1x3': return <Clock3 {...props} />;
+    case 'day-night-48': return <SunMoon {...props} />;
+    case '5x2': return <BriefcaseBusiness {...props} />;
+    case 'custom': return <SlidersHorizontal {...props} />;
+  }
+}
 
 interface OnboardingProps {
   onCreate: (config: ScheduleConfigV1) => void;
@@ -83,44 +105,51 @@ export function Onboarding({ onCreate }: OnboardingProps) {
 
   return (
     <main className="screen onboarding-screen">
-      <section className="hero-copy">
-        <img
-          className="app-mark"
-          src="/assets/app-icon-256.png"
-          alt=""
-          aria-hidden="true"
-          style={{ objectFit: 'cover' }}
-        />
+      <section className="onboarding-brand">
+        <AppIcon size={58} />
         <div>
           <div className="eyebrow">Мой график</div>
-          <h1>Как ты работаешь?</h1>
-          <p>Выбери график или настрой свой вариант.</p>
+          <h1>Настрой смены за минуту</h1>
+          <p>Выбери готовый график или собери свой цикл. Календарь рассчитается автоматически.</p>
         </div>
       </section>
 
-      <div className="preset-grid" role="radiogroup" aria-label="Тип графика">
-        {PRESETS.map((item) => (
-          <button
-            key={item.id}
-            type="button"
-            className={`preset-card ${preset === item.id ? 'is-selected' : ''}`}
-            onClick={() => selectPreset(item.id)}
-            role="radio"
-            aria-checked={preset === item.id}
-          >
-            <span className="preset-icon" aria-hidden="true">{item.icon}</span>
-            <strong>{PRESET_LABELS[item.id]}</strong>
-            <span>{item.description}</span>
-          </button>
-        ))}
-      </div>
+      <section className="onboarding-section">
+        <div className="section-heading">
+          <div>
+            <span className="card-kicker">Шаг 1</span>
+            <h2>Выбери график</h2>
+          </div>
+        </div>
+
+        <div className="preset-grid" role="radiogroup" aria-label="Тип графика">
+          {PRESETS.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              className={`preset-card ${preset === item.id ? 'is-selected' : ''}`}
+              onClick={() => selectPreset(item.id)}
+              role="radio"
+              aria-checked={preset === item.id}
+            >
+              <span className="preset-icon"><PresetIcon preset={item.id} /></span>
+              <span className="preset-copy">
+                <strong>{PRESET_LABELS[item.id]}</strong>
+                <span>{item.description}</span>
+              </span>
+              <span className="preset-radio" aria-hidden="true" />
+            </button>
+          ))}
+        </div>
+      </section>
 
       {preset === 'custom' && (
         <section className="custom-cycle-card">
           <div className="section-heading">
             <div>
-              <h2>Свой цикл</h2>
-              <p>Добавь дни в порядке, в котором они повторяются.</p>
+              <span className="card-kicker">Свой вариант</span>
+              <h2>Собери цикл</h2>
+              <p>Добавляй дни по порядку. Нажми на элемент цикла, чтобы удалить его.</p>
             </div>
             <span className="counter">{customCycle.length}/31</span>
           </div>
@@ -148,6 +177,7 @@ export function Onboarding({ onCreate }: OnboardingProps) {
                 onClick={() => appendCustom(item.type)}
                 disabled={customCycle.length >= 31}
               >
+                <ShiftIcon type={item.type} size={16} />
                 {item.label}
               </button>
             ))}
@@ -156,19 +186,27 @@ export function Onboarding({ onCreate }: OnboardingProps) {
       )}
 
       <section className="date-card">
-        <label htmlFor="anchor-date">С какого числа начать?</label>
-        <p>Выбери первый день указанного цикла.</p>
+        <div className="section-heading">
+          <div>
+            <span className="card-kicker">Шаг 2</span>
+            <h2>Укажи первый день цикла</h2>
+            <p>Выбери дату, с которой начинается выбранный график.</p>
+          </div>
+        </div>
         <input
           id="anchor-date"
+          aria-label="Первый день цикла"
           type="date"
           value={anchorDate}
           onChange={(event) => setAnchorDate(event.target.value)}
         />
       </section>
 
-      <Button size="l" stretched disabled={!canSubmit} onClick={submit}>
-        Построить график
-      </Button>
+      <div className="onboarding-submit">
+        <Button size="l" stretched disabled={!canSubmit} onClick={submit}>
+          Построить график
+        </Button>
+      </div>
     </main>
   );
 }
