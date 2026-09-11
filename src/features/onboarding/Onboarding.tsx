@@ -84,7 +84,13 @@ export function Onboarding({ onCreate }: OnboardingProps) {
   return (
     <main className="screen onboarding-screen">
       <section className="hero-copy">
-        <div className="app-mark" aria-hidden="true">▦</div>
+        <img
+          className="app-mark"
+          src="/assets/app-icon-256.png"
+          alt=""
+          aria-hidden="true"
+          style={{ objectFit: 'cover' }}
+        />
         <div>
           <div className="eyebrow">Мой график</div>
           <h1>Как ты работаешь?</h1>
