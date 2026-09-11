@@ -4,7 +4,6 @@ import {
   ChevronRight,
   Info,
   RefreshCw,
-  SlidersHorizontal,
   Trash2,
 } from 'lucide-react';
 import { AppIcon } from '../../components/AppIcon';
@@ -65,52 +64,44 @@ export function SettingsScreen({
 
   return (
     <main className="screen settings-screen">
-      <header className="settings-page-header">
+      <header className="settings-nav">
         <button type="button" className="icon-button" onClick={onBack} aria-label="Назад">
           <ArrowLeft size={21} strokeWidth={2.2} />
         </button>
-        <div>
-          <h1>Настройки</h1>
-          <p>График и параметры смен</p>
+        <div className="settings-nav-copy">
+          <strong>Настройки</strong>
+          <span>График и параметры смен</span>
         </div>
-        <span className="header-spacer" />
+        <span className="header-spacer" aria-hidden="true" />
       </header>
 
-      <section className="settings-card">
-        <div className="settings-section-title">
-          <SlidersHorizontal size={18} />
-          <h2>График</h2>
-        </div>
+      <div className="settings-group">
+        <span className="settings-group-label">График</span>
+        <section className="settings-list">
+          <button type="button" className="settings-row-button" onClick={onReconfigure}>
+            <span className="settings-row-icon accent"><RefreshCw size={20} /></span>
+            <span className="settings-row-copy">
+              <strong>Рабочий цикл</strong>
+              <span>{PRESET_LABELS[config.preset]} · {config.cycle.length} дней</span>
+            </span>
+            <ChevronRight className="settings-chevron" size={19} aria-hidden="true" />
+          </button>
+        </section>
+      </div>
 
-        <button type="button" className="settings-link-row" onClick={onReconfigure}>
-          <span className="settings-row-icon accent"><RefreshCw size={20} /></span>
-          <span className="settings-row-copy">
-            <strong>{PRESET_LABELS[config.preset]}</strong>
-            <span>{config.cycle.length} дней в цикле</span>
-          </span>
-          <span className="settings-row-action">
-            <span>Изменить</span>
-            <ChevronRight size={18} />
-          </span>
-        </button>
-      </section>
-
-      <section className="settings-card">
-        <div className="settings-section-title">
-          <CalendarDays size={18} />
-          <h2>Время смен</h2>
-        </div>
-
-        <div className="time-settings-list">
+      <div className="settings-group">
+        <span className="settings-group-label">Время смен</span>
+        <section className="settings-list time-settings-list">
           {(Object.keys(TIME_LABELS) as TimeKey[]).map((key) => (
             <div className="time-setting" key={key}>
-              <div className={`settings-row-icon shift-${TIME_SHIFT_TYPES[key]}`}>
+              <span className={`settings-row-icon shift-${TIME_SHIFT_TYPES[key]}`} aria-hidden="true">
                 <ShiftIcon type={TIME_SHIFT_TYPES[key]} size={20} />
-              </div>
-              <div className="time-setting-copy">
+              </span>
+
+              <div className="time-setting-body">
                 <strong>{TIME_LABELS[key]}</strong>
                 <div className="time-inputs">
-                  <label>
+                  <label className="time-field">
                     <span>Начало</span>
                     <input
                       type="time"
@@ -119,8 +110,8 @@ export function SettingsScreen({
                       onChange={(event) => updateTime(key, 'start', event.target.value)}
                     />
                   </label>
-                  <span className="time-separator">—</span>
-                  <label>
+                  <span className="time-separator" aria-hidden="true">—</span>
+                  <label className="time-field">
                     <span>Конец</span>
                     <input
                       type="time"
@@ -133,41 +124,42 @@ export function SettingsScreen({
               </div>
             </div>
           ))}
-        </div>
-      </section>
+        </section>
+      </div>
 
-      <section className="settings-card settings-card-compact">
-        <div className="settings-section-title">
-          <CalendarDays size={18} />
-          <h2>Календарь</h2>
-        </div>
-        <div className="settings-static-row">
-          <span className="settings-row-icon neutral"><CalendarDays size={20} /></span>
-          <span className="settings-row-copy">
-            <strong>Первый день недели</strong>
-            <span>Понедельник</span>
-          </span>
-        </div>
-      </section>
+      <div className="settings-group">
+        <span className="settings-group-label">Календарь</span>
+        <section className="settings-list">
+          <div className="settings-static-row">
+            <span className="settings-row-icon neutral" aria-hidden="true"><CalendarDays size={20} /></span>
+            <span className="settings-row-copy">
+              <strong>Первый день недели</strong>
+              <span>Понедельник</span>
+            </span>
+          </div>
+        </section>
+      </div>
 
-      <section className="settings-card settings-card-compact">
-        <div className="settings-section-title">
-          <Info size={18} />
-          <h2>Приложение</h2>
-        </div>
-        <div className="settings-static-row app-info-row">
-          <AppIcon size={42} />
-          <span className="settings-row-copy">
-            <strong>Мой график</strong>
-            <span>Версия 0.1.0 · VK Mini App</span>
-          </span>
-        </div>
-      </section>
+      <div className="settings-group">
+        <span className="settings-group-label">Приложение</span>
+        <section className="settings-list">
+          <div className="settings-static-row app-info-row">
+            <AppIcon size={40} />
+            <span className="settings-row-copy">
+              <strong>Мой график</strong>
+              <span>Версия 0.1.0 · VK Mini App</span>
+            </span>
+            <Info className="settings-muted-icon" size={18} aria-hidden="true" />
+          </div>
+        </section>
+      </div>
 
-      <button type="button" className="danger-action" onClick={reset}>
-        <Trash2 size={19} />
-        Сбросить график
-      </button>
+      <div className="settings-group danger-group">
+        <button type="button" className="danger-row" onClick={reset}>
+          <Trash2 size={19} />
+          <span>Сбросить график</span>
+        </button>
+      </div>
     </main>
   );
 }
