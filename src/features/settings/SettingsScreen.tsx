@@ -153,7 +153,16 @@ export function SettingsScreen({
               <strong>Мой график</strong>
               <span>Версия 0.1.0 · VK Mini App</span>
             </span>
-            <Info className="settings-muted-icon" size={18} aria-hidden="true" />
+          </div>
+          <div
+            className="settings-static-row developer-info-row"
+            style={{ borderTop: '1px solid var(--separator)' }}
+          >
+            <span className="settings-row-icon neutral" aria-hidden="true"><Info size={20} /></span>
+            <span className="settings-row-copy">
+              <strong>Разработчик</strong>
+              <span>Starcev Apps</span>
+            </span>
           </div>
         </section>
       </div>
