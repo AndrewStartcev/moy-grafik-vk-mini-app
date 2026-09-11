@@ -7,8 +7,14 @@ import { SettingsScreen } from './features/settings/SettingsScreen';
 import type { ScheduleConfigV1 } from './domain/schedule/types';
 import { analytics } from './services/analytics';
 import { scheduleStorage } from './services/storage';
-
-type Screen = 'calendar' | 'settings' | 'onboarding';
+import {
+  type AppScreen,
+  configureVkShell,
+  pushScreenState,
+  replaceScreenState,
+  screenFromHistoryState,
+  subscribeVkLifecycle,
+} from './services/vkPlatform';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -52,7 +58,7 @@ class AppErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState>
 function Application() {
   const [loading, setLoading] = useState(true);
   const [schedule, setSchedule] = useState<ScheduleConfigV1 | null>(null);
-  const [screen, setScreen] = useState<Screen>('onboarding');
+  const [screen, setScreen] = useState<AppScreen>('onboarding');
 
   useEffect(() => {
     let active = true;
@@ -63,8 +69,10 @@ function Application() {
         const saved = await scheduleStorage.load();
         if (!active) return;
 
+        const initialScreen: AppScreen = saved ? 'calendar' : 'onboarding';
         setSchedule(saved);
-        setScreen(saved ? 'calendar' : 'onboarding');
+        setScreen(initialScreen);
+        replaceScreenState(initialScreen);
         analytics.track('app_ready', { has_schedule: Boolean(saved) });
         if (!saved) analytics.track('onboarding_open');
       } catch (error) {
@@ -72,6 +80,7 @@ function Application() {
 
         setSchedule(null);
         setScreen('onboarding');
+        replaceScreenState('onboarding');
         analytics.track('app_error', {
           message: error instanceof Error ? error.message : 'startup_failed',
         });
@@ -88,21 +97,77 @@ function Application() {
     };
   }, []);
 
+  useEffect(() => {
+    const onPopState = (event: PopStateEvent) => {
+      const target = screenFromHistoryState(event.state);
+      setScreen(target ?? (schedule ? 'calendar' : 'onboarding'));
+    };
+
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, [schedule]);
+
+  useEffect(() => {
+    const isRootScreen = screen === 'calendar' || (screen === 'onboarding' && !schedule);
+    void configureVkShell(isRootScreen);
+  }, [schedule, screen]);
+
+  useEffect(() => {
+    const flush = () => {
+      void scheduleStorage.flush();
+      void analytics.flush();
+    };
+
+    const unsubscribe = subscribeVkLifecycle({
+      onHide: () => {
+        analytics.track('app_hide');
+        flush();
+      },
+      onRestore: () => {
+        analytics.track('app_restore');
+      },
+    });
+
+    window.addEventListener('pagehide', flush);
+    return () => {
+      unsubscribe();
+      window.removeEventListener('pagehide', flush);
+    };
+  }, []);
+
   const persist = (next: ScheduleConfigV1) => {
     setSchedule(next);
-    void scheduleStorage.save(next);
+    scheduleStorage.save(next);
   };
 
   const create = (next: ScheduleConfigV1) => {
     persist(next);
+    replaceScreenState('calendar');
     setScreen('calendar');
   };
 
   const reset = () => {
     setSchedule(null);
+    replaceScreenState('onboarding');
     setScreen('onboarding');
     void scheduleStorage.clear();
     analytics.track('onboarding_open');
+  };
+
+  const openSettings = () => {
+    analytics.track('settings_open');
+    pushScreenState('settings');
+    setScreen('settings');
+  };
+
+  const closeSettings = () => {
+    const current = screenFromHistoryState(window.history.state);
+    if (current === 'settings' && window.history.length > 1) {
+      window.history.back();
+    } else {
+      replaceScreenState('calendar');
+      setScreen('calendar');
+    }
   };
 
   if (loading) {
@@ -127,10 +192,11 @@ function Application() {
     return (
       <SettingsScreen
         config={schedule}
-        onBack={() => setScreen('calendar')}
+        onBack={closeSettings}
         onChange={persist}
         onReconfigure={() => {
           analytics.track('onboarding_open');
+          replaceScreenState('onboarding');
           setScreen('onboarding');
         }}
         onReset={reset}
@@ -142,10 +208,7 @@ function Application() {
     <CalendarScreen
       config={schedule}
       onChange={persist}
-      onOpenSettings={() => {
-        analytics.track('settings_open');
-        setScreen('settings');
-      }}
+      onOpenSettings={openSettings}
     />
   );
 }
