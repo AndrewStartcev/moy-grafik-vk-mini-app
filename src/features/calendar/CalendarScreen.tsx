@@ -68,7 +68,13 @@ export function CalendarScreen({ config, onChange, onOpenSettings }: CalendarScr
     <main className="screen calendar-screen">
       <header className="app-header">
         <div className="brand-inline">
-          <span className="app-mark small" aria-hidden="true">▦</span>
+          <img
+            className="app-mark small"
+            src="/assets/app-icon-256.png"
+            alt=""
+            aria-hidden="true"
+            style={{ objectFit: 'cover' }}
+          />
           <div>
             <strong>Мой график</strong>
             <small>Календарь смен</small>
