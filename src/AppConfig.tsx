@@ -4,6 +4,7 @@ import { AdaptivityProvider, AppRoot, ConfigProvider } from '@vkontakte/vkui';
 import '@vkontakte/vkui/dist/vkui.css';
 import { App } from './App';
 import './styles/app.css';
+import './styles/polish.css';
 
 export function AppConfig() {
   const appearance = useAppearance() || undefined;
