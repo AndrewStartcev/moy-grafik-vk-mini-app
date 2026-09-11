@@ -1,32 +1,66 @@
 import vkBridge from '@vkontakte/vk-bridge';
-import type { ScheduleConfigV1, ShiftType } from '../domain/schedule/types';
+import type {
+  CycleShiftType,
+  ScheduleConfigV1,
+  SchedulePreset,
+  ShiftType,
+} from '../domain/schedule/types';
 
 const STORAGE_KEY = 'moy_grafik_schedule';
 const VK_STORAGE_TIMEOUT_MS = 1200;
 
+const CYCLE_SHIFT_TYPES: CycleShiftType[] = ['day', 'night', 'full_day', 'off'];
 const SHIFT_TYPES: ShiftType[] = ['day', 'night', 'full_day', 'off', 'vacation', 'sick'];
+const SCHEDULE_PRESETS: SchedulePreset[] = ['2x2', '3x3', '5x2', '1x3', 'day-night-48', 'custom'];
 
 function isScheduleConfigV1(value: unknown): value is ScheduleConfigV1 {
   if (!value || typeof value !== 'object') return false;
-  const config = value as Partial<ScheduleConfigV1>;
 
-  return (
-    config.version === 1 &&
-    typeof config.anchorDate === 'string' &&
-    typeof config.preset === 'string' &&
-    Array.isArray(config.cycle) &&
-    config.cycle.length > 0 &&
-    config.cycle.length <= 31 &&
-    config.cycle.every((item) => SHIFT_TYPES.includes(item as ShiftType) && item !== 'vacation' && item !== 'sick') &&
-    !!config.times &&
-    typeof config.times.day?.start === 'string' &&
-    typeof config.times.day?.end === 'string' &&
-    typeof config.times.night?.start === 'string' &&
-    typeof config.times.night?.end === 'string' &&
-    typeof config.times.fullDay?.start === 'string' &&
-    typeof config.times.fullDay?.end === 'string' &&
-    !!config.overrides &&
-    typeof config.overrides === 'object'
+  const config = value as Record<string, unknown>;
+  const cycle = config.cycle;
+  const times = config.times;
+  const overrides = config.overrides;
+
+  if (
+    config.version !== 1 ||
+    typeof config.anchorDate !== 'string' ||
+    typeof config.preset !== 'string' ||
+    !SCHEDULE_PRESETS.includes(config.preset as SchedulePreset) ||
+    !Array.isArray(cycle) ||
+    cycle.length === 0 ||
+    cycle.length > 31 ||
+    !cycle.every(
+      (item) => typeof item === 'string' && CYCLE_SHIFT_TYPES.includes(item as CycleShiftType),
+    ) ||
+    !times ||
+    typeof times !== 'object' ||
+    !overrides ||
+    typeof overrides !== 'object' ||
+    Array.isArray(overrides)
+  ) {
+    return false;
+  }
+
+  const typedTimes = times as Record<string, unknown>;
+  const day = typedTimes.day;
+  const night = typedTimes.night;
+  const fullDay = typedTimes.fullDay;
+
+  const isShiftTime = (shiftTime: unknown): boolean => {
+    if (!shiftTime || typeof shiftTime !== 'object') return false;
+    const value = shiftTime as Record<string, unknown>;
+    return typeof value.start === 'string' && typeof value.end === 'string';
+  };
+
+  if (!isShiftTime(day) || !isShiftTime(night) || !isShiftTime(fullDay)) {
+    return false;
+  }
+
+  return Object.entries(overrides as Record<string, unknown>).every(
+    ([date, shift]) =>
+      /^\d{4}-\d{2}-\d{2}$/.test(date) &&
+      typeof shift === 'string' &&
+      SHIFT_TYPES.includes(shift as ShiftType),
   );
 }
 
