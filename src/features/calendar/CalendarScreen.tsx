@@ -1,0 +1,166 @@
+import { useMemo, useState } from 'react';
+import {
+  daysInMonth,
+  formatDateKey,
+  parseDateKey,
+  todayDateKey,
+  weekdayMondayFirst,
+} from '../../domain/schedule/date';
+import { findNextWorkShift, resolveDay } from '../../domain/schedule/engine';
+import {
+  MONTHS_NOMINATIVE,
+  SHIFT_ICONS,
+  SHIFT_LABELS,
+  SHIFT_SHORT_LABELS,
+  formatShortHumanDate,
+  pluralDays,
+} from '../../domain/schedule/presentation';
+import { calculateMonthStatistics } from '../../domain/schedule/statistics';
+import type { ScheduleConfigV1, ShiftType } from '../../domain/schedule/types';
+import { analytics } from '../../services/analytics';
+import { DaySheet } from './DaySheet';
+
+const WEEKDAYS = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС'];
+
+function shiftTime(config: ScheduleConfigV1, shift: ShiftType): string | null {
+  if (shift === 'day') return `${config.times.day.start} — ${config.times.day.end}`;
+  if (shift === 'night') return `${config.times.night.start} — ${config.times.night.end}`;
+  if (shift === 'full_day') return '24 часа';
+  return null;
+}
+
+interface CalendarScreenProps {
+  config: ScheduleConfigV1;
+  onChange: (config: ScheduleConfigV1) => void;
+  onOpenSettings: () => void;
+}
+
+export function CalendarScreen({ config, onChange, onOpenSettings }: CalendarScreenProps) {
+  const today = todayDateKey();
+  const current = parseDateKey(today);
+  const [view, setView] = useState({ year: current.year, month: current.month });
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+
+  const todayResolved = resolveDay(config, today);
+  const nextShift = findNextWorkShift(config, today);
+  const stats = useMemo(
+    () => calculateMonthStatistics(config, view.year, view.month),
+    [config, view],
+  );
+
+  const firstWeekday = weekdayMondayFirst(formatDateKey(view.year, view.month, 1));
+  const monthDays = daysInMonth(view.year, view.month);
+
+  const changeMonth = (direction: -1 | 1) => {
+    const date = new Date(Date.UTC(view.year, view.month - 1 + direction, 1));
+    setView({ year: date.getUTCFullYear(), month: date.getUTCMonth() + 1 });
+    analytics.track('calendar_month_changed', {
+      direction: direction > 0 ? 'next' : 'previous',
+    });
+  };
+
+  const openDay = (date: string) => {
+    setSelectedDate(date);
+    analytics.track('day_opened', { shift_type: resolveDay(config, date).shift });
+  };
+
+  return (
+    <main className="screen calendar-screen">
+      <header className="app-header">
+        <div className="brand-inline">
+          <span className="app-mark small" aria-hidden="true">▦</span>
+          <div>
+            <strong>Мой график</strong>
+            <small>Календарь смен</small>
+          </div>
+        </div>
+        <button type="button" className="icon-button settings-button" onClick={onOpenSettings} aria-label="Настройки">
+          ⚙
+        </button>
+      </header>
+
+      <section className={`today-card shift-${todayResolved.shift}`}>
+        <div className="today-icon" aria-hidden="true">{SHIFT_ICONS[todayResolved.shift]}</div>
+        <div className="today-content">
+          <span>Сегодня, {formatShortHumanDate(today)}</span>
+          <h1>{SHIFT_LABELS[todayResolved.shift]}</h1>
+          {shiftTime(config, todayResolved.shift) && <strong>{shiftTime(config, todayResolved.shift)}</strong>}
+        </div>
+        {nextShift && (
+          <div className="next-shift">
+            <span aria-hidden="true">▣</span>
+            Следующая смена {formatShortHumanDate(nextShift.date)} · через {nextShift.daysAway} {pluralDays(nextShift.daysAway)}
+          </div>
+        )}
+      </section>
+
+      <section className="calendar-card">
+        <div className="calendar-titlebar">
+          <h2>{MONTHS_NOMINATIVE[view.month - 1]} {view.year}</h2>
+          <div className="month-controls">
+            <button type="button" onClick={() => changeMonth(-1)} aria-label="Предыдущий месяц">‹</button>
+            <button type="button" onClick={() => changeMonth(1)} aria-label="Следующий месяц">›</button>
+          </div>
+        </div>
+
+        <div className="weekday-row" aria-hidden="true">
+          {WEEKDAYS.map((day) => <span key={day}>{day}</span>)}
+        </div>
+
+        <div className="calendar-grid">
+          {Array.from({ length: firstWeekday }, (_, index) => (
+            <span className="calendar-empty" key={`empty-${index}`} />
+          ))}
+          {Array.from({ length: monthDays }, (_, index) => {
+            const day = index + 1;
+            const date = formatDateKey(view.year, view.month, day);
+            const resolved = resolveDay(config, date);
+            const isToday = date === today;
+            return (
+              <button
+                type="button"
+                key={date}
+                className={`calendar-day shift-${resolved.shift} ${isToday ? 'is-today' : ''} ${resolved.isOverride ? 'is-override' : ''}`}
+                onClick={() => openDay(date)}
+                aria-label={`${day}. ${SHIFT_LABELS[resolved.shift]}`}
+              >
+                <span className="day-number">{day}</span>
+                <span className="day-shift">{SHIFT_SHORT_LABELS[resolved.shift]}</span>
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
+      <section className="stats-section">
+        <div className="section-heading compact">
+          <h2>Итоги за месяц</h2>
+          <span>{MONTHS_NOMINATIVE[view.month - 1]} {view.year}</span>
+        </div>
+        <div className="stats-grid">
+          <div className="stat-card"><strong>{stats.workShiftCount}</strong><span>смен</span></div>
+          <div className="stat-card"><strong>{stats.totalWorkHours}</strong><span>часов</span></div>
+          <div className="stat-card"><strong>{stats.offCount}</strong><span>выходных</span></div>
+        </div>
+        {(stats.nightCount > 0 || stats.fullDayCount > 0) && (
+          <p className="stats-breakdown">
+            {stats.dayCount > 0 && `${stats.dayCount} дневных`}
+            {stats.dayCount > 0 && stats.nightCount > 0 && ' · '}
+            {stats.nightCount > 0 && `${stats.nightCount} ночных`}
+            {(stats.dayCount > 0 || stats.nightCount > 0) && stats.fullDayCount > 0 && ' · '}
+            {stats.fullDayCount > 0 && `${stats.fullDayCount} суточных`}
+          </p>
+        )}
+      </section>
+
+      {selectedDate && (
+        <DaySheet
+          date={selectedDate}
+          config={config}
+          onChange={onChange}
+          onClose={() => setSelectedDate(null)}
+        />
+      )}
+    </main>
+  );
+}
