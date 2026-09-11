@@ -6,6 +6,7 @@ import {
   ChevronRight,
   Clock3,
   Settings,
+  Share2,
 } from 'lucide-react';
 import { AppIcon } from '../../components/AppIcon';
 import { ShiftIcon } from '../../components/ShiftIcon';
@@ -28,6 +29,7 @@ import { calculateMonthStatistics } from '../../domain/schedule/statistics';
 import type { ScheduleConfigV1, ShiftType } from '../../domain/schedule/types';
 import { ads } from '../../services/ads';
 import { analytics } from '../../services/analytics';
+import { stories, type StoryOpenResult } from '../../services/stories';
 import { DaySheet } from './DaySheet';
 
 const WEEKDAYS = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС'];
@@ -36,6 +38,13 @@ function shiftTime(config: ScheduleConfigV1, shift: ShiftType): string | null {
   if (shift === 'day') return `${config.times.day.start} — ${config.times.day.end}`;
   if (shift === 'night') return `${config.times.night.start} — ${config.times.night.end}`;
   if (shift === 'full_day') return `${config.times.fullDay.start} — ${config.times.fullDay.end}`;
+  return null;
+}
+
+function storyStatusText(status: StoryOpenResult | 'idle'): string | null {
+  if (status === 'opened') return 'Редактор истории открыт';
+  if (status === 'unavailable') return 'Истории недоступны в этом клиенте VK';
+  if (status === 'failed') return 'Не удалось открыть историю. Попробуй ещё раз.';
   return null;
 }
 
@@ -50,6 +59,8 @@ export function CalendarScreen({ config, onChange, onOpenSettings }: CalendarScr
   const current = parseDateKey(today);
   const [view, setView] = useState({ year: current.year, month: current.month });
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [storyStatus, setStoryStatus] = useState<StoryOpenResult | 'idle'>('idle');
+  const [storyOpening, setStoryOpening] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -89,6 +100,22 @@ export function CalendarScreen({ config, onChange, onOpenSettings }: CalendarScr
     setSelectedDate(date);
     analytics.track('day_opened', { shift_type: resolveDay(config, date).shift });
   };
+
+  const shareToStory = async () => {
+    if (storyOpening) return;
+    setStoryOpening(true);
+    setStoryStatus('idle');
+
+    const result = await stories.openScheduleStory(config);
+    setStoryStatus(result);
+    setStoryOpening(false);
+
+    window.setTimeout(() => {
+      setStoryStatus((currentStatus) => (currentStatus === result ? 'idle' : currentStatus));
+    }, 3200);
+  };
+
+  const currentStoryStatusText = storyStatusText(storyStatus);
 
   return (
     <main className="screen calendar-screen">
@@ -229,6 +256,32 @@ export function CalendarScreen({ config, onChange, onOpenSettings }: CalendarScr
             {stats.nightCount > 0 && `${stats.nightCount} ночных`}
             {(stats.dayCount > 0 || stats.nightCount > 0) && stats.fullDayCount > 0 && ' · '}
             {stats.fullDayCount > 0 && `${stats.fullDayCount} суточных`}
+          </p>
+        )}
+      </section>
+
+      <section className="share-section" aria-label="Поделиться графиком">
+        <button
+          type="button"
+          className="share-story-button"
+          onClick={() => void shareToStory()}
+          disabled={storyOpening}
+          aria-describedby={currentStoryStatusText ? 'share-story-status' : undefined}
+        >
+          <span className="share-story-icon" aria-hidden="true"><Share2 size={20} /></span>
+          <span className="share-story-copy">
+            <strong>{storyOpening ? 'Открываем историю…' : 'Поделиться графиком'}</strong>
+            <span>Выложить в историю VK без рабочих дат</span>
+          </span>
+          <ChevronRight size={19} aria-hidden="true" />
+        </button>
+        {currentStoryStatusText && (
+          <p
+            id="share-story-status"
+            className={`share-story-status is-${storyStatus}`}
+            role="status"
+          >
+            {currentStoryStatusText}
           </p>
         )}
       </section>
