@@ -9,7 +9,6 @@ import {
   SlidersHorizontal,
   SunMoon,
 } from 'lucide-react';
-import { AppIcon } from '../../components/AppIcon';
 import { ShiftIcon } from '../../components/ShiftIcon';
 import { createScheduleConfig } from '../../domain/schedule/config';
 import { PRESET_LABELS } from '../../domain/schedule/presets';
@@ -106,8 +105,7 @@ export function Onboarding({ onCreate }: OnboardingProps) {
 
   return (
     <main className="screen onboarding-screen">
-      <section className="onboarding-brand">
-        <AppIcon size={52} />
+      <section className="onboarding-brand onboarding-brand-text-only">
         <div className="onboarding-brand-copy">
           <span className="eyebrow">Мой график</span>
           <h1>Настрой смены за минуту</h1>
