@@ -1,4 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode, useEffect, useState } from 'react';
+import { CircleAlert } from 'lucide-react';
+import { AppIcon } from './components/AppIcon';
 import { CalendarScreen } from './features/calendar/CalendarScreen';
 import { Onboarding } from './features/onboarding/Onboarding';
 import { SettingsScreen } from './features/settings/SettingsScreen';
@@ -32,9 +34,9 @@ class AppErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState>
       return (
         <main className="screen fatal-screen">
           <div className="fatal-card">
-            <div className="fatal-icon">!</div>
+            <div className="fatal-icon" aria-hidden="true"><CircleAlert size={26} /></div>
             <h1>Что-то пошло не так</h1>
-            <p>Перезапусти приложение. Твой график сохранён отдельно от интерфейса.</p>
+            <p>Перезапусти приложение. Сохранённый график останется на месте.</p>
             <button type="button" className="primary-html-button" onClick={() => window.location.reload()}>
               Попробовать снова
             </button>
@@ -106,14 +108,7 @@ function Application() {
   if (loading) {
     return (
       <main className="screen loading-screen">
-        <img
-          src="/assets/app-icon-256.png"
-          alt=""
-          aria-hidden="true"
-          width={64}
-          height={64}
-          style={{ borderRadius: 18, objectFit: 'cover' }}
-        />
+        <AppIcon size={68} className="loading-app-icon" />
         <strong>Мой график</strong>
         <span className="loading-spinner" aria-label="Загрузка" />
       </main>
