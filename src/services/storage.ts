@@ -2,6 +2,7 @@ import vkBridge from '@vkontakte/vk-bridge';
 import type { ScheduleConfigV1, ShiftType } from '../domain/schedule/types';
 
 const STORAGE_KEY = 'moy_grafik_schedule';
+const VK_STORAGE_TIMEOUT_MS = 1200;
 
 const SHIFT_TYPES: ShiftType[] = ['day', 'night', 'full_day', 'off', 'vacation', 'sick'];
 
@@ -40,13 +41,32 @@ function parseSchedule(raw: string | null): ScheduleConfigV1 | null {
   }
 }
 
+function withTimeout<T>(promise: Promise<T>, fallback: T, timeoutMs: number): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((resolve) => {
+      window.setTimeout(() => resolve(fallback), timeoutMs);
+    }),
+  ]);
+}
+
 async function readFromVk(): Promise<string | null> {
-  const response = await vkBridge.send('VKWebAppStorageGet', { keys: [STORAGE_KEY] });
+  const response = await withTimeout(
+    vkBridge.send('VKWebAppStorageGet', { keys: [STORAGE_KEY] }),
+    null,
+    VK_STORAGE_TIMEOUT_MS,
+  );
+
+  if (!response) return null;
   return response.keys?.find((item) => item.key === STORAGE_KEY)?.value || null;
 }
 
 async function writeToVk(value: string): Promise<void> {
-  await vkBridge.send('VKWebAppStorageSet', { key: STORAGE_KEY, value });
+  await withTimeout(
+    vkBridge.send('VKWebAppStorageSet', { key: STORAGE_KEY, value }).then(() => undefined),
+    undefined,
+    VK_STORAGE_TIMEOUT_MS,
+  );
 }
 
 function readLocal(): string | null {
@@ -67,6 +87,10 @@ function writeLocal(value: string): void {
 
 export const scheduleStorage = {
   async load(): Promise<ScheduleConfigV1 | null> {
+    // A valid local copy must make startup instant and independent of VK Bridge.
+    const local = parseSchedule(readLocal());
+    if (local) return local;
+
     try {
       const fromVk = parseSchedule(await readFromVk());
       if (fromVk) {
@@ -74,10 +98,10 @@ export const scheduleStorage = {
         return fromVk;
       }
     } catch {
-      // Browser fallback below.
+      // Browser/local fallback below.
     }
 
-    return parseSchedule(readLocal());
+    return null;
   },
 
   async save(config: ScheduleConfigV1): Promise<void> {
