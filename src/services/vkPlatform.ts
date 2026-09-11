@@ -21,28 +21,21 @@ export const vkPlatform = {
   isDesktopWeb: vkLaunchParams.vk_platform === 'desktop_web',
 };
 
-async function safeSend<T>(callback: () => Promise<T>): Promise<T | null> {
-  try {
-    return await callback();
-  } catch {
-    return null;
-  }
-}
-
 export async function configureVkShell(isRootScreen: boolean): Promise<void> {
   if (!vkBridge.isEmbedded()) return;
 
-  await Promise.all([
-    safeSend(() => vkBridge.send('VKWebAppSetTitle', { title: 'Мой график' })),
-    safeSend(() => vkBridge.send('VKWebAppSetSwipeSettings', { history: isRootScreen })),
-  ]);
+  try {
+    await vkBridge.send('VKWebAppSetSwipeSettings', { history: isRootScreen });
+  } catch {
+    // Unsupported clients should not block the application.
+  }
 }
 
 export function subscribeVkLifecycle(callbacks: {
   onHide?: () => void;
   onRestore?: () => void;
 }): () => void {
-  const handler = (event: Parameters<typeof vkBridge.subscribe>[0] extends (event: infer E) => void ? E : never) => {
+  const handler: Parameters<typeof vkBridge.subscribe>[0] = (event) => {
     if (!event?.detail) return;
 
     if (event.detail.type === 'VKWebAppViewHide') {
