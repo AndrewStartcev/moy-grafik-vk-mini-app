@@ -1,5 +1,15 @@
 import { useMemo, useState } from 'react';
 import {
+  CalendarClock,
+  CalendarDays,
+  ChevronLeft,
+  ChevronRight,
+  Clock3,
+  Settings,
+} from 'lucide-react';
+import { AppIcon } from '../../components/AppIcon';
+import { ShiftIcon } from '../../components/ShiftIcon';
+import {
   daysInMonth,
   formatDateKey,
   parseDateKey,
@@ -9,7 +19,6 @@ import {
 import { findNextWorkShift, resolveDay } from '../../domain/schedule/engine';
 import {
   MONTHS_NOMINATIVE,
-  SHIFT_ICONS,
   SHIFT_LABELS,
   SHIFT_SHORT_LABELS,
   formatShortHumanDate,
@@ -25,7 +34,7 @@ const WEEKDAYS = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС'];
 function shiftTime(config: ScheduleConfigV1, shift: ShiftType): string | null {
   if (shift === 'day') return `${config.times.day.start} — ${config.times.day.end}`;
   if (shift === 'night') return `${config.times.night.start} — ${config.times.night.end}`;
-  if (shift === 'full_day') return '24 часа';
+  if (shift === 'full_day') return `${config.times.fullDay.start} — ${config.times.fullDay.end}`;
   return null;
 }
 
@@ -68,44 +77,59 @@ export function CalendarScreen({ config, onChange, onOpenSettings }: CalendarScr
     <main className="screen calendar-screen">
       <header className="app-header">
         <div className="brand-inline">
-          <img
-            className="app-mark small"
-            src="/assets/app-icon-256.png"
-            alt=""
-            aria-hidden="true"
-            style={{ objectFit: 'cover' }}
-          />
-          <div>
+          <AppIcon size={44} />
+          <div className="brand-copy">
             <strong>Мой график</strong>
             <small>Календарь смен</small>
           </div>
         </div>
-        <button type="button" className="icon-button settings-button" onClick={onOpenSettings} aria-label="Настройки">
-          ⚙
+        <button
+          type="button"
+          className="icon-button settings-button"
+          onClick={onOpenSettings}
+          aria-label="Настройки"
+        >
+          <Settings size={21} strokeWidth={2.2} />
         </button>
       </header>
 
       <section className={`today-card shift-${todayResolved.shift}`}>
-        <div className="today-icon" aria-hidden="true">{SHIFT_ICONS[todayResolved.shift]}</div>
-        <div className="today-content">
-          <span>Сегодня, {formatShortHumanDate(today)}</span>
-          <h1>{SHIFT_LABELS[todayResolved.shift]}</h1>
-          {shiftTime(config, todayResolved.shift) && <strong>{shiftTime(config, todayResolved.shift)}</strong>}
-        </div>
-        {nextShift && (
-          <div className="next-shift">
-            <span aria-hidden="true">▣</span>
-            Следующая смена {formatShortHumanDate(nextShift.date)} · через {nextShift.daysAway} {pluralDays(nextShift.daysAway)}
+        <div className="today-main">
+          <div className="today-icon" aria-hidden="true">
+            <ShiftIcon type={todayResolved.shift} size={26} strokeWidth={2.1} />
           </div>
+          <div className="today-content">
+            <span>Сегодня, {formatShortHumanDate(today)}</span>
+            <h1>{SHIFT_LABELS[todayResolved.shift]}</h1>
+            {shiftTime(config, todayResolved.shift) && <strong>{shiftTime(config, todayResolved.shift)}</strong>}
+          </div>
+        </div>
+
+        {nextShift && (
+          <button type="button" className="next-shift" onClick={() => openDay(nextShift.date)}>
+            <span className="next-shift-icon" aria-hidden="true"><CalendarClock size={18} /></span>
+            <span>
+              <small>Следующая смена</small>
+              <strong>{formatShortHumanDate(nextShift.date)} · через {nextShift.daysAway} {pluralDays(nextShift.daysAway)}</strong>
+            </span>
+            <ChevronRight size={18} aria-hidden="true" />
+          </button>
         )}
       </section>
 
       <section className="calendar-card">
         <div className="calendar-titlebar">
-          <h2>{MONTHS_NOMINATIVE[view.month - 1]} {view.year}</h2>
+          <div>
+            <span className="card-kicker">Календарь</span>
+            <h2>{MONTHS_NOMINATIVE[view.month - 1]} {view.year}</h2>
+          </div>
           <div className="month-controls">
-            <button type="button" onClick={() => changeMonth(-1)} aria-label="Предыдущий месяц">‹</button>
-            <button type="button" onClick={() => changeMonth(1)} aria-label="Следующий месяц">›</button>
+            <button type="button" onClick={() => changeMonth(-1)} aria-label="Предыдущий месяц">
+              <ChevronLeft size={20} />
+            </button>
+            <button type="button" onClick={() => changeMonth(1)} aria-label="Следующий месяц">
+              <ChevronRight size={20} />
+            </button>
           </div>
         </div>
 
@@ -132,23 +156,47 @@ export function CalendarScreen({ config, onChange, onOpenSettings }: CalendarScr
               >
                 <span className="day-number">{day}</span>
                 <span className="day-shift">{SHIFT_SHORT_LABELS[resolved.shift]}</span>
+                {resolved.isOverride && <span className="override-dot" aria-hidden="true" />}
               </button>
             );
           })}
+        </div>
+
+        <div className="calendar-legend" aria-label="Обозначения">
+          <span><i className="legend-dot legend-work" />Работа</span>
+          <span><i className="legend-dot legend-off" />Выходной</span>
+          <span><i className="legend-ring" />Сегодня</span>
         </div>
       </section>
 
       <section className="stats-section">
         <div className="section-heading compact">
-          <h2>Итоги за месяц</h2>
+          <div>
+            <span className="card-kicker">Статистика</span>
+            <h2>Итоги за месяц</h2>
+          </div>
           <span>{MONTHS_NOMINATIVE[view.month - 1]} {view.year}</span>
         </div>
+
         <div className="stats-grid">
-          <div className="stat-card"><strong>{stats.workShiftCount}</strong><span>смен</span></div>
-          <div className="stat-card"><strong>{stats.totalWorkHours}</strong><span>часов</span></div>
-          <div className="stat-card"><strong>{stats.offCount}</strong><span>выходных</span></div>
+          <div className="stat-card">
+            <span className="stat-icon"><CalendarDays size={18} /></span>
+            <strong>{stats.workShiftCount}</strong>
+            <span>смен</span>
+          </div>
+          <div className="stat-card">
+            <span className="stat-icon"><Clock3 size={18} /></span>
+            <strong>{stats.totalWorkHours}</strong>
+            <span>часов</span>
+          </div>
+          <div className="stat-card">
+            <span className="stat-icon"><ShiftIcon type="off" size={18} /></span>
+            <strong>{stats.offCount}</strong>
+            <span>выходных</span>
+          </div>
         </div>
-        {(stats.nightCount > 0 || stats.fullDayCount > 0) && (
+
+        {(stats.dayCount > 0 || stats.nightCount > 0 || stats.fullDayCount > 0) && (
           <p className="stats-breakdown">
             {stats.dayCount > 0 && `${stats.dayCount} дневных`}
             {stats.dayCount > 0 && stats.nightCount > 0 && ' · '}
